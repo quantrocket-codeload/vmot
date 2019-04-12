@@ -137,7 +137,6 @@ class ValueMomentumTrendCombined(Moonshot):
                "SHARESWA", # Outstanding shares
                "GROSSMARGIN", # Gross margin
                "ASSETTURNOVER", # Asset turnover
-               "REPORTPERIOD"
            ])
         return_on_assets = fundamentals.loc["ROA"]
         total_assets = fundamentals.loc["ASSETS"]
@@ -153,6 +152,11 @@ class ValueMomentumTrendCombined(Moonshot):
 
         # Step 2.a: get a boolean mask of the first day of each newly reported fiscal
         # period
+        fundamentals = get_sharadar_fundamentals_reindexed_like(
+            closes,
+            domain=self.MASTER_DOMAIN,
+            dimension="ART", # As-reported trailing twelve month reports
+            fields=["REPORTPERIOD"])
         fiscal_periods = fundamentals.loc["REPORTPERIOD"]
         are_new_fiscal_periods = fiscal_periods != fiscal_periods.shift()
 
