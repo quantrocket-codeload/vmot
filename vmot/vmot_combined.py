@@ -15,7 +15,7 @@
 from moonshot import Moonshot
 from moonshot.commission import PerShareCommission
 from quantrocket.fundamental import get_sharadar_fundamentals_reindexed_like
-from quantrocket.history import get_historical_prices
+from quantrocket import get_prices
 
 class USStockCommission(PerShareCommission):
     IB_COMMISSION_PER_SHARE = 0.005
@@ -214,7 +214,7 @@ class ValueMomentumTrendCombined(Moonshot):
 
         # Step 8-9: Sell when trend is down
         # Get the market prices
-        market_prices = get_historical_prices(self.TREND_DB, fields="Close", start_date=weights.index.min(), end_date=weights.index.max())
+        market_prices = get_prices(self.TREND_DB, fields="Close", start_date=weights.index.min(), end_date=weights.index.max())
         market_closes = market_prices.loc["Close"]
 
         # Convert 1-column DataFrame to Series
