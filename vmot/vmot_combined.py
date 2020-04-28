@@ -1,4 +1,4 @@
-# Copyright 2018 QuantRocket LLC - All Rights Reserved
+# Copyright 2020 QuantRocket LLC - All Rights Reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ from quantrocket.fundamental import get_sharadar_fundamentals_reindexed_like
 from quantrocket import get_prices
 
 class USStockCommission(PerShareCommission):
-    IB_COMMISSION_PER_SHARE = 0.005
+    BROKER_COMMISSION_PER_SHARE = 0.005
 
 class ValueMomentumTrendCombined(Moonshot):
     """
@@ -54,20 +54,20 @@ class ValueMomentumTrendCombined(Moonshot):
     """
 
     CODE = "vmot"
-    DB = "sharadar-1d"
+    DB = "sharadar-us-stk-1d"
     DB_FIELDS = ["Close", "Volume"]
     DOLLAR_VOLUME_TOP_N_PCT = 60
     DOLLAR_VOLUME_WINDOW = 90
     UNIVERSES = "nyse-stk"
     EXCLUDE_UNIVERSES = ["nyse-financials", "nyse-adrs", "nyse-reits"]
-    TREND_DB = "spy-1d"
+    TREND_DB = "sharadar-us-etf-1d"
+    TREND_SID = "FIBBG000BDTBL9"
     VALUE_TOP_N_PCT = 20
     QUALITY_TOP_N_PCT = 50
     MOMENTUM_WINDOW = 252
     MOMENTUM_EXCLUDE_MOST_RECENT_WINDOW = 22
     MOMENTUM_TOP_N_PCT = 20
     SMOOTHEST_TOP_N_PCT = 50
-    MASTER_DOMAIN = "sharadar" # use "sharadar" with Sharadar prices, use "main" with IB prices
     REBALANCE_INTERVAL = "Q-NOV"
     TREND_REBALANCE_INTERVAL = "W"
     COMMISSION_CLASS = USStockCommission
@@ -86,8 +86,7 @@ class ValueMomentumTrendCombined(Moonshot):
         fundamentals = get_sharadar_fundamentals_reindexed_like(
             closes,
             fields=["EVEBIT", "EBIT"],
-            dimension="ART",
-            domain=self.MASTER_DOMAIN)
+            dimension="ART")
         enterprise_multiples = fundamentals.loc["EVEBIT"]
         ebits = fundamentals.loc["EBIT"]
         # Ignore negative earnings
@@ -126,7 +125,6 @@ class ValueMomentumTrendCombined(Moonshot):
         # Step 1: query relevant indicators
         fundamentals = get_sharadar_fundamentals_reindexed_like(
             closes,
-            domain=self.MASTER_DOMAIN,
            dimension="ART", # As-reported trailing twelve month reports
            fields=[
                "ROA", # Return on assets
@@ -154,7 +152,6 @@ class ValueMomentumTrendCombined(Moonshot):
         # period
         fundamentals = get_sharadar_fundamentals_reindexed_like(
             closes,
-            domain=self.MASTER_DOMAIN,
             dimension="ART", # As-reported trailing twelve month reports
             fields=["REPORTPERIOD"])
         fiscal_periods = fundamentals.loc["REPORTPERIOD"]
@@ -214,7 +211,7 @@ class ValueMomentumTrendCombined(Moonshot):
 
         # Step 8-9: Sell when trend is down
         # Get the market prices
-        market_prices = get_prices(self.TREND_DB, fields="Close", start_date=weights.index.min(), end_date=weights.index.max())
+        market_prices = get_prices(self.TREND_DB, sids=self.TREND_SID, fields="Close", start_date=weights.index.min(), end_date=weights.index.max())
         market_closes = market_prices.loc["Close"]
 
         # Convert 1-column DataFrame to Series

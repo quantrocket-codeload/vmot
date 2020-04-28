@@ -1,4 +1,4 @@
-# Copyright 2018 QuantRocket LLC - All Rights Reserved
+# Copyright 2020 QuantRocket LLC - All Rights Reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ from moonshot import Moonshot
 from moonshot.commission import PerShareCommission
 
 class USStockCommission(PerShareCommission):
-    IB_COMMISSION_PER_SHARE = 0.005
+    BROKER_COMMISSION_PER_SHARE = 0.005
 
 class VMOTTrend(Moonshot):
     """
@@ -30,7 +30,8 @@ class VMOTTrend(Moonshot):
     """
 
     CODE = "vmot-trend"
-    DB = "spy-1d"
+    DB = "sharadar-us-etf-1d"
+    SIDS = "FIBBG000BDTBL9"
     REBALANCE_INTERVAL = "W"
     COMMISSION_CLASS = USStockCommission
 
