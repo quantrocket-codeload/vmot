@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pandas as pd
 from moonshot import Moonshot
 from moonshot.commission import PerShareCommission
 from quantrocket.fundamental import get_sharadar_fundamentals_reindexed_like
@@ -72,7 +73,7 @@ class ValueMomentumTrendCombined(Moonshot):
     TREND_REBALANCE_INTERVAL = "W"
     COMMISSION_CLASS = USStockCommission
 
-    def prices_to_signals(self, prices):
+    def prices_to_signals(self, prices: pd.DataFrame):
 
         # Step 1.c: get a mask of stocks with adequate dollar volume
         closes = prices.loc["Close"]
@@ -120,7 +121,7 @@ class ValueMomentumTrendCombined(Moonshot):
 
         return signals
 
-    def get_f_scores(self, closes):
+    def get_f_scores(self, closes: pd.DataFrame):
 
         # Step 1: query relevant indicators
         fundamentals = get_sharadar_fundamentals_reindexed_like(
@@ -197,7 +198,7 @@ class ValueMomentumTrendCombined(Moonshot):
         self.save_to_results("FScore", f_scores)
         return f_scores
 
-    def signals_to_target_weights(self, signals, prices):
+    def signals_to_target_weights(self, signals: pd.DataFrame, prices: pd.DataFrame):
         # Step 6: equal weights
         daily_signal_counts = signals.abs().sum(axis=1)
         weights = signals.div(daily_signal_counts, axis=0).fillna(0)
@@ -240,11 +241,11 @@ class ValueMomentumTrendCombined(Moonshot):
 
         return weights
 
-    def target_weights_to_positions(self, weights, prices):
+    def target_weights_to_positions(self, weights: pd.DataFrame, prices: pd.DataFrame):
         # Enter the position the day after the signal
         return weights.shift()
 
-    def positions_to_gross_returns(self, positions, prices):
+    def positions_to_gross_returns(self, positions: pd.DataFrame, prices: pd.DataFrame):
 
         closes = prices.loc["Close"]
         position_ends = positions.shift()
